@@ -26,7 +26,7 @@ local function Counter()
     if not fn then
       self[name] = self[name] or 0
       fn = function(inc)
-        self[name] = self[name] + (inc or 1)
+        self[name] = self[name] + 1
         return self[name]
       end
       self[1][name] = fn
@@ -48,6 +48,78 @@ local _ENV = TEST_CASE'EventEmitter self test' if ENABLE then
 local it = IT(_ENV or _M)
 
 it('should pass internal test', ut.self_test)
+
+end
+
+local _ENV = TEST_CASE'EventEmitter API' if ENABLE then
+local it = IT(_ENV or _M)
+
+function setup()
+  emitter = em.EventEmitter.new()
+  counters = Counter()
+end
+
+it('module should has API', function()
+  assert_function(em.EventEmitter)
+  assert_function(em._NAME)
+  assert_function(em._VERSION)
+end)
+
+it('emitter should has API', function()
+  assert_function(emitter.once)
+  assert_function(emitter.on)
+  assert_function(emitter.off)
+  assert_function(emitter.many)
+  assert_function(emitter.onAny)
+  assert_function(emitter.offAny)
+  assert_function(emitter.onceAny)
+  assert_function(emitter.manyAny)
+end)
+
+it('should pass self and event', function()
+  emitter = em.EventEmitter.new{wildcard=true}
+
+  emitter:on('A.*', function(self, event, value)
+    counters('e0')()
+    assert_equal(emitter, self)
+    assert_equal('A.B',   event)
+    assert_equal('hello', value)
+  end)
+
+  emitter:onAny(function(self, event, value)
+    counters('e1')()
+    assert_equal(emitter, self)
+    assert_equal('A.B',   event)
+    assert_equal('hello', value)
+  end)
+
+  emitter:emit('A.B', 'hello')
+
+  assert_equal(1, counters.e0)
+  assert_equal(1, counters.e1)
+end)
+
+it('should pass self and event with wildcard', function()
+  emitter:on('A', function(self, event, value)
+    counters('e0')()
+    assert_equal(emitter, self)
+    assert_equal('A',     event)
+    assert_equal('hello', value)
+  end)
+
+  emitter:onAny(function(self, event, value)
+    counters('e1')()
+    assert_equal(emitter, self)
+    assert_equal('A',     event)
+    assert_equal('hello', value)
+  end)
+
+  emitter:emit('A', 'hello')
+
+  assert_equal(1, counters.e0)
+  assert_equal(1, counters.e1)
+end)
+
 
 end
 

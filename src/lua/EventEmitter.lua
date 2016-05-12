@@ -398,8 +398,8 @@ function EventEmitter:off(...)
   return self
 end
 
-function EventEmitter:emit(...)
-  self._impl:emit(...)
+function EventEmitter:emit(event, ...)
+  self._impl:emit(event, self, event, ...)
   return self
 end
 
