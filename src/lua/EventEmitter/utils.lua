@@ -79,12 +79,21 @@ local function class_self_test()
   B.new(1, 2, 3)
 end
 
+local function clone(t, o)
+  o = o or {}
+  for k, v in pairs(t) do
+    o[k] = v
+  end
+  return o
+end
+
 local function self_test()
   slit_first_self_test()
   class_self_test()
 end
 
 return {
+  clone       = clone;
   class       = class;
   split_first = split_first;
   self_test   = self_test;

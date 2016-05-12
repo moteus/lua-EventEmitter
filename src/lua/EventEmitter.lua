@@ -10,6 +10,13 @@
 --
 ------------------------------------------------------------------
 
+local EE = {
+  _NAME      = "EventEmitter";
+  _VERSION   = "0.1.0-dev";
+  _COPYRIGHT = "Copyright (C) 2016 Alexey Melnichuk";
+  _LICENSE   = "MIT";
+}
+
 local ut = require "EventEmitter.utils"
 
 local BasicEventEmitter = ut.class() do
@@ -418,8 +425,8 @@ end
 
 end
 
-return {
+return ut.clone(EE, {
   EventEmitter      = EventEmitter,
   BasicEventEmitter = BasicEventEmitter,
   TreeEventEmitter  = TreeEventEmitter,
-}
+})

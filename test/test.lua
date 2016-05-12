@@ -35,6 +35,13 @@ local function Counter()
   end})
 end
 
+print("------------------------------------")
+print("Module    name: " .. em._NAME);
+print("Module version: " .. em._VERSION);
+print("Lua    version: " .. (_G.jit and _G.jit.version or _G._VERSION))
+print("------------------------------------")
+print("")
+
 local ENABLE = true
 
 local _ENV = TEST_CASE'EventEmitter self test' if ENABLE then
