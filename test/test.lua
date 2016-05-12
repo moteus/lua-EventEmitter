@@ -60,9 +60,10 @@ function setup()
 end
 
 it('module should has API', function()
-  assert_function(em.EventEmitter)
-  assert_function(em._NAME)
-  assert_function(em._VERSION)
+  assert(em.EventEmitter)
+  assert_function(em.EventEmitter.new)
+  assert_string(em._NAME)
+  assert_string(em._VERSION)
 end)
 
 it('emitter should has API', function()
