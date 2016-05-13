@@ -89,7 +89,7 @@ function BasicEventEmitter:off(event, handler)
 
   else
 
-    for handler in pairs(self._once) do
+    for _, handler in pairs(self._once) do
       for i = 1, #list do
         if list[i] == handler then
           self._once[handler] = nil

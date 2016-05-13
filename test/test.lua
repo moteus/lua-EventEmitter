@@ -187,9 +187,11 @@ end)
 
 it('should remove once', function()
   emitter:once('A', counters'e0')
+  emitter:once('A', counters'e1')
   emitter:off('A', counters'e0')
   emitter:emit('A')
   assert_equal(0, counters.e0)
+  assert_equal(1, counters.e1)
 end)
 
 it('should remove all', function()
