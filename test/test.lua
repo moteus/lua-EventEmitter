@@ -19,7 +19,7 @@ local TEST_CASE = require "lunit".TEST_CASE
 local ut        = require "EventEmitter.utils"
 local em        = require "EventEmitter"
 
-local pcall, error, type, table, ipairs, print = pcall, error, type, table, ipairs, print
+local pcall, error, type, table, ipairs, print, next = pcall, error, type, table, ipairs, print, next
 local IT, RUN = utils.IT, utils.RUN
 
 local function Counter()
@@ -56,6 +56,8 @@ end
 local _ENV = TEST_CASE'EventEmitter API' if ENABLE then
 local it = IT(_ENV or _M)
 
+local counters
+
 function setup()
   emitter = em.EventEmitter.new()
   counters = Counter()
@@ -63,6 +65,8 @@ end
 
 it('module should has API', function()
   assert(em.EventEmitter)
+  assert_function(em.extend_class)
+  assert_function(em.extend_object)
   assert_function(em.EventEmitter.new)
   assert_string(em._NAME)
   assert_string(em._VERSION)
@@ -123,6 +127,21 @@ it('should pass self and event with wildcard', function()
   assert_equal(1, counters.e1)
 end)
 
+it('emit should pass custom self', function()
+  emitter = em.EventEmitter.new{self = 'hello'}
+
+  emitter:once ('A', function(self)
+    assert_equal('hello', self)
+    counters'e0'()
+  end)
+  emitter:on   ('A', function(self)
+    assert_equal('hello', self)
+    counters'e1'()
+  end)
+  emitter:emit('A')
+  assert_equal(1, counters.e0)
+  assert_equal(1, counters.e1)
+end)
 
 end
 
@@ -515,6 +534,101 @@ it('test 4', function()
   assert_equal(1, counters.e0)
   assert_equal(0, counters.e1)
 end)
+
+end
+
+local _ENV = TEST_CASE'EventEmitter extend' if ENABLE then
+local it = IT(_ENV or _M)
+
+local exports = {'on','many','once','off','emit','onAny','manyAny','onceAny','offAny'}
+
+local emitter, counters
+
+function setup()
+  counters = Counter()
+end
+
+function teardown()
+  emitter, counters = nil
+end
+
+it("should extend class", function()
+  local my_class = {}
+  local t = em.extend_class(my_class)
+  assert_equal(my_class, t)
+  for _, method in ipairs(exports) do
+    assert_function(my_class[method], method)
+    my_class[method] = nil
+  end
+  assert_nil(next(my_class))
+end)
+
+it("extend class shold work", function()
+  local CustomClass = em.extend_class(ut.class())
+  function CustomClass:__init()
+    self._EventEmitter = em.EventEmitter.new{self=self}
+    return self
+  end
+
+  emitter = CustomClass.new()
+
+  emitter:on('A', counters'e0')
+  emitter:emit('A')
+  assert_equal(1, counters.e0)
+end)
+
+it("extend class shold pass correct self", function()
+  local CustomClass = em.extend_class(ut.class())
+  function CustomClass:__init()
+    self._EventEmitter = em.EventEmitter.new{self=self}
+    return self
+  end
+
+  emitter = CustomClass.new()
+
+  emitter:on('A', function(self,event)
+    assert_equal(emitter, self)
+    assert_equal(event, 'A')
+    counters'e0'()
+  end)
+
+  emitter:emit('A')
+
+  assert_equal(1, counters.e0)
+end)
+
+it("should extend object", function()
+  local object = ut.class{}.new()
+
+  local t = em.extend_object(object)
+  assert_equal(object, t)
+
+  for _, method in ipairs(exports) do
+    assert_function(object[method], method)
+  end
+end)
+
+it("extend object should work", function()
+  emitter = em.extend_object(ut.class{}.new())
+  emitter:on('A', counters'e0')
+  emitter:emit('A')
+  assert_equal(1, counters.e0)
+end)
+
+it("extend object shold pass correct self", function()
+  emitter = em.extend_object(ut.class{}.new())
+
+  emitter:on('A', function(self,event)
+    assert_equal(emitter, self)
+    assert_equal(event, 'A')
+    counters'e0'()
+  end)
+
+  emitter:emit('A')
+
+  assert_equal(1, counters.e0)
+end)
+
 
 end
 

@@ -404,6 +404,8 @@ function EventEmitter:__init(opt)
   else
     self._EventEmitter = BasicEventEmitter.new()
   end
+  self._EventEmitter_self = opt and opt.self or self
+
   return self
 end
 
@@ -428,7 +430,7 @@ function EventEmitter:off(...)
 end
 
 function EventEmitter:emit(event, ...)
-  self._EventEmitter:emit(event, self, event, ...)
+  self._EventEmitter:emit(event, self._EventEmitter_self, event, ...)
   return self
 end
 
@@ -454,6 +456,34 @@ end
 
 end
 
+local extend, wrap do
+
+local exports = {'on', 'many', 'once', 'off', 'emit', 'onAny', 'manyAny', 'onceAny', 'offAny'}
+
+function extend(class)
+  for _, method in ipairs(exports) do
+    class[method] = function(self, ...)
+      return self._EventEmitter[method](self._EventEmitter, ...)
+    end
+  end
+  return class
+end
+
+function wrap(object, emitter)
+  emitter = emitter or EventEmitter.new{self = object}
+  for _, method in ipairs(exports) do
+    object[method] = function(self, ...)
+      return emitter[method](emitter, ...)
+    end
+  end
+  return object
+end
+
+end
+
 return ut.clone(EE, {
-  EventEmitter = EventEmitter,
+  EventEmitter  = EventEmitter,
+  new           = EventEmitter.new,
+  extend_object = wrap,
+  extend_class  = extend,
 })
