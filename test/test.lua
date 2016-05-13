@@ -280,7 +280,7 @@ local it = IT(_ENV or _M)
 local emitter, counters
 
 function setup()
-  emitter = em.TreeEventEmitter.new('::')
+  emitter = em.EventEmitter.new{wildcard=true, delimiter = '::'}
   counters = Counter()
 end
 
@@ -314,7 +314,7 @@ it('should match only subclass 2', function()
   assert_equal(1, counters.e2)
 end)
 
-it('should match whildcard in the middle of emit', function()
+it('should match wildcard in the middle of emit', function()
   emitter:on('A',       counters'e0')
   emitter:on('A::*',    counters'e1')
   emitter:on('A::B',    counters'e2')
@@ -332,7 +332,7 @@ it('should match whildcard in the middle of emit', function()
   assert_equal(1, counters.e5)
 end)
 
-it('should match whildcard in the end of emit', function()
+it('should match wildcard in the end of emit', function()
   emitter:on('A',       counters'e0')
   emitter:on('A::*',    counters'e1')
   emitter:on('A::B',    counters'e2')
@@ -350,7 +350,7 @@ it('should match whildcard in the end of emit', function()
   assert_equal(0, counters.e5)
 end)
 
-it('should match whildcard at level', function()
+it('should match wildcard at level', function()
   emitter:on('A',       counters'e0')
   emitter:on('A::*',    counters'e1')
   emitter:on('A::B',    counters'e2')
