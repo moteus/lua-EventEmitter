@@ -12,6 +12,7 @@ return {
   coveralls   = {
     pathcorrect = {
       {"^.-/share/lua/5.%d/", "src/lua/"};
+      {"^%.%./src/lua/", "src/lua/"};
     },
   },
 }
