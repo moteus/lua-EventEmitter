@@ -12,6 +12,8 @@
 
 package.path = "../src/lua/?.lua;" .. package.path
 
+pcall(require, "luacov")
+
 local utils     = require "utils"
 local TEST_CASE = require "lunit".TEST_CASE
 local ut        = require "EventEmitter.utils"
