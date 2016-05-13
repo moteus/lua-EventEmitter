@@ -14,10 +14,10 @@ package.path = "../src/lua/?.lua;" .. package.path
 
 pcall(require, "luacov")
 
-local utils     = require "utils"
-local TEST_CASE = require "lunit".TEST_CASE
-local ut        = require "EventEmitter.utils"
-local em        = require "EventEmitter"
+local utils        = require "utils"
+local TEST_CASE    = require "lunit".TEST_CASE
+local ut           = require "EventEmitter.utils"
+local EventEmitter = require "EventEmitter"
 
 local pcall, error, type, table, ipairs, print, next = pcall, error, type, table, ipairs, print, next
 local IT, RUN = utils.IT, utils.RUN
@@ -38,8 +38,8 @@ local function Counter()
 end
 
 print("------------------------------------")
-print("Module    name: " .. em._NAME);
-print("Module version: " .. em._VERSION);
+print("Module    name: " .. EventEmitter._NAME);
+print("Module version: " .. EventEmitter._VERSION);
 print("Lua    version: " .. (_G.jit and _G.jit.version or _G._VERSION))
 print("------------------------------------")
 print("")
@@ -59,17 +59,17 @@ local it = IT(_ENV or _M)
 local counters
 
 function setup()
-  emitter = em.EventEmitter.new()
+  emitter = EventEmitter.new()
   counters = Counter()
 end
 
 it('module should has API', function()
-  assert(em.EventEmitter)
-  assert_function(em.extend_class)
-  assert_function(em.extend_object)
-  assert_function(em.EventEmitter.new)
-  assert_string(em._NAME)
-  assert_string(em._VERSION)
+  assert(EventEmitter)
+  assert_function(EventEmitter.extend_class)
+  assert_function(EventEmitter.extend_object)
+  assert_function(EventEmitter.new)
+  assert_string(EventEmitter._NAME)
+  assert_string(EventEmitter._VERSION)
 end)
 
 it('emitter should has API', function()
@@ -84,7 +84,7 @@ it('emitter should has API', function()
 end)
 
 it('should pass self and event', function()
-  emitter = em.EventEmitter.new{wildcard=true}
+  emitter = EventEmitter.new{wildcard=true}
 
   emitter:on('A.*', function(self, event, value)
     counters('e0')()
@@ -128,7 +128,7 @@ it('should pass self and event with wildcard', function()
 end)
 
 it('emit should pass custom self', function()
-  emitter = em.EventEmitter.new{self = 'hello'}
+  emitter = EventEmitter.new{self = 'hello'}
 
   emitter:once ('A', function(self)
     assert_equal('hello', self)
@@ -151,7 +151,7 @@ local it = IT(_ENV or _M)
 local emitter, counters
 
 function setup()
-  emitter = em.EventEmitter.new()
+  emitter = EventEmitter.new()
   counters = Counter()
 end
 
@@ -299,7 +299,7 @@ local it = IT(_ENV or _M)
 local emitter, counters
 
 function setup()
-  emitter = em.EventEmitter.new{wildcard=true, delimiter = '::'}
+  emitter = EventEmitter.new{wildcard=true, delimiter = '::'}
   counters = Counter()
 end
 
@@ -387,6 +387,42 @@ it('should match wildcard at level', function()
   assert_equal(1, counters.e5)
 end)
 
+it('should count events with wildcard', function()
+  emitter:many('A',       1, counters'e0')
+  emitter:many('A::*',    1, counters'e1')
+  emitter:many('A::B',    1, counters'e2')
+  emitter:many('A::B::C', 1, counters'e3')
+  emitter:many('A::B::*', 2, counters'e4')
+  emitter:many('A::*::C', 3, counters'e5')
+
+  emitter:emit('A::B::*')
+  emitter:emit('A::*::*')
+  emitter:emit('A::*::C')
+  emitter:emit('A::B::C')
+
+  assert_equal(0, counters.e0)
+  assert_equal(0, counters.e1)
+  assert_equal(0, counters.e2)
+  assert_equal(1, counters.e3)
+  assert_equal(2, counters.e4)
+  assert_equal(3, counters.e5)
+end)
+
+it('should count any events', function()
+  emitter:manyAny(1, counters'e0')
+  emitter:manyAny(2, counters'e1')
+  emitter:manyAny(3, counters'e2')
+
+  emitter:emit('A')
+  emitter:emit('B')
+  emitter:emit('C')
+  emitter:emit('D')
+
+  assert_equal(1, counters.e0)
+  assert_equal(2, counters.e1)
+  assert_equal(3, counters.e2)
+end)
+
 it('should calls handle only once', function()
   emitter:on('A',    counters'e0')
   emitter:on('A',    counters'e0')
@@ -434,7 +470,7 @@ local it = IT(_ENV or _M)
 local emitter, counters
 
 function setup()
-  emitter = em.EventEmitter.new{wildcard = true; delimiter = '::'}
+  emitter = EventEmitter.new{wildcard = true; delimiter = '::'}
   counters = Counter()
 end
 
@@ -554,7 +590,7 @@ end
 
 it("should extend class", function()
   local my_class = {}
-  local t = em.extend_class(my_class)
+  local t = EventEmitter.extend_class(my_class)
   assert_equal(my_class, t)
   for _, method in ipairs(exports) do
     assert_function(my_class[method], method)
@@ -564,9 +600,9 @@ it("should extend class", function()
 end)
 
 it("extend class shold work", function()
-  local CustomClass = em.extend_class(ut.class())
+  local CustomClass = EventEmitter.extend_class(ut.class())
   function CustomClass:__init()
-    self._EventEmitter = em.EventEmitter.new{self=self}
+    self._EventEmitter = EventEmitter.new{self=self}
     return self
   end
 
@@ -578,9 +614,9 @@ it("extend class shold work", function()
 end)
 
 it("extend class shold pass correct self", function()
-  local CustomClass = em.extend_class(ut.class())
+  local CustomClass = EventEmitter.extend_class(ut.class())
   function CustomClass:__init()
-    self._EventEmitter = em.EventEmitter.new{self=self}
+    self._EventEmitter = EventEmitter.new{self=self}
     return self
   end
 
@@ -600,7 +636,7 @@ end)
 it("should extend object", function()
   local object = ut.class{}.new()
 
-  local t = em.extend_object(object)
+  local t = EventEmitter.extend_object(object)
   assert_equal(object, t)
 
   for _, method in ipairs(exports) do
@@ -609,14 +645,14 @@ it("should extend object", function()
 end)
 
 it("extend object should work", function()
-  emitter = em.extend_object(ut.class{}.new())
+  emitter = EventEmitter.extend_object(ut.class{}.new())
   emitter:on('A', counters'e0')
   emitter:emit('A')
   assert_equal(1, counters.e0)
 end)
 
 it("extend object shold pass correct self", function()
-  emitter = em.extend_object(ut.class{}.new())
+  emitter = EventEmitter.extend_object(ut.class{}.new())
 
   emitter:on('A', function(self,event)
     assert_equal(emitter, self)

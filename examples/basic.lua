@@ -1,4 +1,4 @@
-local EventEmitter = require "EventEmitter".EventEmitter
+local EventEmitter = require "EventEmitter"
 
 local server = EventEmitter.new()
 
