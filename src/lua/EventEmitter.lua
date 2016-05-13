@@ -26,7 +26,9 @@ local ANY_EVENT = {}
 BasicEventEmitter.ANY = ANY_EVENT
 
 function BasicEventEmitter:__init()
+  -- map of array of listners
   self._handlers = {}
+  -- map to convert user's listener to internal wrapper
   self._once     = {}
 
   return self
@@ -142,7 +144,7 @@ function BasicEventEmitter:emit(event, ...)
   return self:_emit_impl(true, event, ...)
 end
 
-function BasicEventEmitter:emitAll(...)
+function BasicEventEmitter:_emit_all(...)
   -- we have to copy because cb can remove/add some events
   -- and we do not need call new one or removed one
   local names = {}
@@ -155,6 +157,10 @@ function BasicEventEmitter:emitAll(...)
   end
 
   return self
+end
+
+function BasicEventEmitter:_empty()
+  return nil == next(self._handlers)
 end
 
 end
@@ -229,6 +235,8 @@ local function find_emitter(self, event, create, node, cb, ...)
       node[1] = emitter
     end
     cb(emitter, event, ...)
+    -- remove empty emitter. We really need check only on `off` event
+    if (not create) and emitter:_empty() then node[1] = nil end
     return true
   end
 
@@ -242,7 +250,13 @@ local function find_emitter(self, event, create, node, cb, ...)
     tree = {}
     node[name] = tree
   end
-  return find_emitter(self, tail, create, tree, cb, ...)
+
+  local ret = find_emitter(self, tail, create, tree, cb, ...)
+  if (not create) and (nil == next(tree)) then
+    node[name] = nil
+  end
+
+  return ret
 end
 
 function TreeEventEmitter:many(event, ...)
@@ -272,24 +286,28 @@ local function do_emit(self, wld, event, node, ...)
 
   if not tail then
     -- match mask to event
-    if node[1] then
+    local emitter = node[1]
+    if emitter then
       if event == self._wld then
-        node[1]:emitAll()
+        emitter:_emit_all()
       else
-        node[1]:_emit_impl(false, AN2, ...)
-        node[1]:emit(event, ...)
+        emitter:_emit_impl(false, AN2, ...)
+        emitter:emit(event, ...)
       end
+      if emitter:_empty() then node[1] = nil end
     end
+    
 
     -- match mask `**` to event
     -- e.g. origin mask is 'A::**::B' and event is 'A::B'
-    local em = node[self._wl2] and node[self._wl2][1]
-    if em then
+    emitter = node[self._wl2] and node[self._wl2][1]
+    if emitter then
       if event ~= self._wld then
-        em:emitAll()
+        emitter:_emit_all()
       else
-        em:emit(event, ...)
+        emitter:emit(event, ...)
       end
+      if emitter:_empty() then node[1] = nil end
     end
 
     return self
@@ -355,13 +373,16 @@ end
 end
 
 do -- Debug code
--- local server = TreeEventEmitter.new('::')
--- local c = function(str) return function() print(str) end end
+local c = function(str) return function() print(str) end end
+local server = TreeEventEmitter.new('::')
 -- server:on('A',           c'e0');
 -- server:on('A::*',        c'e1');
 -- server:on('A::**',       c'e2');
 -- server:on('A::**::C',    c'e3');
--- server:on('A::**::B::C', c'e4');
+server:on('A::**::B::C', c'e4');
+
+server:off('A::**::B::C');
+
 -- server:emit('A::B')
 -- server:emit('A::*')
 -- server:emit('A::B::C')
@@ -371,62 +392,60 @@ local EventEmitter = ut.class() do
 
 function EventEmitter:__init(opt)
   if opt and opt.wildcard then
-    self._impl = TreeEventEmitter.new(opt.delimiter)
+    self._EventEmitter = TreeEventEmitter.new(opt.delimiter)
   else
-    self._impl = BasicEventEmitter.new()
+    self._EventEmitter = BasicEventEmitter.new()
   end
   return self
 end
 
 function EventEmitter:on(...)
-  self._impl:on(...)
+  self._EventEmitter:on(...)
   return self
 end
 
 function EventEmitter:many(...)
-  self._impl:many(...)
+  self._EventEmitter:many(...)
   return self
 end
 
 function EventEmitter:once(...)
-  self._impl:once(...)
+  self._EventEmitter:once(...)
   return self
 end
 
 function EventEmitter:off(...)
-  self._impl:off(...)
+  self._EventEmitter:off(...)
   return self
 end
 
 function EventEmitter:emit(event, ...)
-  self._impl:emit(event, self, event, ...)
+  self._EventEmitter:emit(event, self, event, ...)
   return self
 end
 
 function EventEmitter:onAny(...)
-  self._impl:onAny(...)
+  self._EventEmitter:onAny(...)
   return self
 end
 
 function EventEmitter:manyAny(...)
-  self._impl:manyAny(...)
+  self._EventEmitter:manyAny(...)
   return self
 end
 
 function EventEmitter:onceAny(...)
-  self._impl:onceAny(...)
+  self._EventEmitter:onceAny(...)
   return self
 end
 
 function EventEmitter:offAny(...)
-  self._impl:offAny(...)
+  self._EventEmitter:offAny(...)
   return self
 end
 
 end
 
 return ut.clone(EE, {
-  EventEmitter      = EventEmitter,
-  BasicEventEmitter = BasicEventEmitter,
-  TreeEventEmitter  = TreeEventEmitter,
+  EventEmitter = EventEmitter,
 })
