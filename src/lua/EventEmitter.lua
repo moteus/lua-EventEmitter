@@ -317,6 +317,7 @@ local function do_emit(self, wld, event, node, ...)
   -- we have call this listner for node `A`
   if node[1] then
     node[1]:_emit_impl(false, AN2, ...)
+    if node[1]:_empty() then node[1] = nil end
   end
 
   -- wld = true if current node has mask == '**'
@@ -328,18 +329,26 @@ local function do_emit(self, wld, event, node, ...)
     -- e.g. we have mask='A::**::B' and event='A::B'
     -- so here name = 'A', tail = 'B' so we have to use `event`
     do_emit(self, true, event, node[self._wl2], ...)
+    if nil == next(node[self._wl2]) then node[self._wl2] = nil end
   end
 
   -- here we handle wildcard in mask like `A::*::B`
-  do_emit(self, false, tail, node[self._wld], ...)
+  if node[self._wld] then
+    do_emit(self, false, tail, node[self._wld], ...)
+    if nil == next(node[self._wld]) then node[self._wld] = nil end
+  end
 
   -- check if event has wildcard like `A::*`
   if name == self._wld then
     for k, v in pairs(node) do if (k ~= 1) and (k ~= self._wld) and (k ~= self._wl2) then
       do_emit(self, false, tail, v, ...)
+      if nil == next(v) then node[k] = nil end
     end end
   else
-    do_emit(self, false, tail, node[name], ...)
+    if node[name] then
+      do_emit(self, false, tail, node[name], ...)
+      if nil == next(node[name]) then node[name] = nil end
+    end
   end
 
   return self
@@ -373,15 +382,14 @@ end
 end
 
 do -- Debug code
-local c = function(str) return function() print(str) end end
-local server = TreeEventEmitter.new('::')
+-- local c = function(str) return function() print(str) end end
+-- local server = TreeEventEmitter.new('::')
 -- server:on('A',           c'e0');
 -- server:on('A::*',        c'e1');
 -- server:on('A::**',       c'e2');
 -- server:on('A::**::C',    c'e3');
-server:on('A::**::B::C', c'e4');
-
-server:off('A::**::B::C');
+-- server:on('A::**::B::C', c'e4');
+-- server:once('A::**::B::C', c'e4');
 
 -- server:emit('A::B')
 -- server:emit('A::*')
