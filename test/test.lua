@@ -37,6 +37,8 @@ local function Counter()
   end})
 end
 
+local function dummy()end
+
 print("------------------------------------")
 print("Module    name: " .. EventEmitter._NAME);
 print("Module version: " .. EventEmitter._VERSION);
@@ -141,6 +143,58 @@ it('emit should pass custom self', function()
   emitter:emit('A')
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
+end)
+
+it('`emit` shold not accept invalid args', function()
+  assert_error('no args'        , function() emitter:on()    end        )
+end)
+
+it('`on` shold not accept invalid args', function()
+  assert_error('no args'        , function() emitter:on()    end        )
+  assert_error('no listner'     , function() emitter:on('A') end        )
+  assert_error('no event'       , function() emitter:on(nil, dummy) end )
+  assert_error('invalid listner', function() emitter:on('A', 'B') end   )
+end)
+
+it('`onAny` shold not accept invalid args', function()
+  assert_error('no args'        , function() emitter:onAny()    end        )
+  assert_error('no listner'     , function() emitter:onAny('A') end        )
+  assert_error('no event'       , function() emitter:onAny(nil, dummy) end )
+  assert_error('invalid listner', function() emitter:onAny('A', 'B') end   )
+end)
+
+it('`once` shold not accept invalid args', function()
+  assert_error('no args'        , function() emitter:once()    end        )
+  assert_error('no listner'     , function() emitter:once('A') end        )
+  assert_error('no event'       , function() emitter:once(nil, dummy) end )
+  assert_error('invalid listner', function() emitter:once('A', 'B') end   )
+end)
+
+it('`onceAny` shold not accept invalid args', function()
+  assert_error('no args'        , function() emitter:onceAny()    end        )
+  assert_error('no listner'     , function() emitter:onceAny('A') end        )
+  assert_error('no event'       , function() emitter:onceAny(nil, dummy) end )
+  assert_error('invalid listner', function() emitter:onceAny('A', 'B') end   )
+end)
+
+it('`many` shold not accept invalid args', function()
+  assert_error('no args'        , function() emitter:many()       end            )
+  assert_error('no ttl'         , function() emitter:many('A', nil, dummy) end   )
+  assert_error('invalid ttl'    , function() emitter:many('A', '1', dummy) end   )
+  assert_error('omit ttl'       , function() emitter:many('A', dummy) end        )
+  assert_error('no listner'     , function() emitter:many('A', 1) end            )
+  assert_error('no event'       , function() emitter:many(nil, 1, dummy) end     )
+  assert_error('invalid listner', function() emitter:many('A', 1, 'B') end       )
+end)
+
+it('`manyAny` shold not accept invalid args', function()
+  assert_error('no args'        , function() emitter:manyAny()       end            )
+  assert_error('no ttl'         , function() emitter:manyAny('A', nil, dummy) end   )
+  assert_error('invalid ttl'    , function() emitter:manyAny('A', '1', dummy) end   )
+  assert_error('omit ttl'       , function() emitter:manyAny('A', dummy) end        )
+  assert_error('no listner'     , function() emitter:manyAny('A', 1) end            )
+  assert_error('no event'       , function() emitter:manyAny(nil, 1, dummy) end     )
+  assert_error('invalid listner', function() emitter:manyAny('A', 1, 'B') end       )
 end)
 
 end

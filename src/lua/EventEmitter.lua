@@ -19,6 +19,10 @@ local EE = {
 
 local ut = require "EventEmitter.utils"
 
+local function callable(f)
+  return type(f) == 'function'
+end
+
 local BasicEventEmitter = ut.class() do
 
 local ANY_EVENT = {}
@@ -26,7 +30,7 @@ local ANY_EVENT = {}
 BasicEventEmitter.ANY = ANY_EVENT
 
 function BasicEventEmitter:__init()
-  -- map of array of listners
+  -- map of array of listeners
   self._handlers = {}
   -- map to convert user's listener to internal wrapper
   self._once     = {}
@@ -131,7 +135,7 @@ function BasicEventEmitter:_emit_impl(call_any, event, ...)
   if list then
     for i = #list, 1, -1 do
       if list[i] then
-        -- we need this check because cb could remove some listners
+        -- we need this check because cb could remove some listeners
         list[i](...)
       end
     end
@@ -314,7 +318,7 @@ local function do_emit(self, wld, event, node, ...)
   end
 
   -- if we have mask like `A::**` and emit event say `A::B::C` then
-  -- we have call this listner for node `A`
+  -- we have call this listener for node `A`
   if node[1] then
     node[1]:_emit_impl(false, AN2, ...)
     if node[1]:_empty() then node[1] = nil end
@@ -409,48 +413,72 @@ function EventEmitter:__init(opt)
   return self
 end
 
-function EventEmitter:on(...)
-  self._EventEmitter:on(...)
+function EventEmitter:on(event, listener)
+  assert(event, 'event expected')
+  assert(callable(listener), 'function expected')
+
+  self._EventEmitter:on(event, listener)
   return self
 end
 
-function EventEmitter:many(...)
-  self._EventEmitter:many(...)
+function EventEmitter:many(event, ttl, listener)
+  assert(event, 'event expected')
+  assert(type(ttl) == 'number', 'number required')
+  assert(callable(listener), 'function expected')
+
+  self._EventEmitter:many(event, ttl, listener)
   return self
 end
 
-function EventEmitter:once(...)
-  self._EventEmitter:once(...)
+function EventEmitter:once(event, listener)
+  assert(event, 'event expected')
+  assert(callable(listener), 'function expected')
+
+  self._EventEmitter:once(event, listener)
   return self
 end
 
-function EventEmitter:off(...)
-  self._EventEmitter:off(...)
+function EventEmitter:off(event, listener)
+  assert(event, 'event expected')
+  assert((listener == nil) or callable(listener), 'function expected')
+
+  self._EventEmitter:off(event, listener)
   return self
 end
 
 function EventEmitter:emit(event, ...)
+  assert(event, 'event expected')
+
   self._EventEmitter:emit(event, self._EventEmitter_self, event, ...)
   return self
 end
 
-function EventEmitter:onAny(...)
-  self._EventEmitter:onAny(...)
+function EventEmitter:onAny(listener)
+  assert(callable(listener), 'function expected')
+
+  self._EventEmitter:onAny(listener)
   return self
 end
 
-function EventEmitter:manyAny(...)
-  self._EventEmitter:manyAny(...)
+function EventEmitter:manyAny(ttl, listener)
+  assert(type(ttl) == 'number', 'number required')
+  assert(callable(listener), 'function expected')
+
+  self._EventEmitter:manyAny(ttl, listener)
   return self
 end
 
-function EventEmitter:onceAny(...)
-  self._EventEmitter:onceAny(...)
+function EventEmitter:onceAny(listener)
+  assert(callable(listener), 'function expected')
+
+  self._EventEmitter:onceAny(listener)
   return self
 end
 
-function EventEmitter:offAny(...)
-  self._EventEmitter:offAny(...)
+function EventEmitter:offAny(listener)
+  assert((listener == nil) or callable(listener), 'function expected')
+
+  self._EventEmitter:offAny(listener)
   return self
 end
 
