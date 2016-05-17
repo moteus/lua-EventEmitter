@@ -724,4 +724,78 @@ end)
 
 end
 
+local _ENV = TEST_CASE'EventEmitter remove listners' if ENABLE then
+local it = IT(_ENV or _M)
+
+local emitter, counters
+
+function setup()
+  counters = Counter()
+end
+
+function teardown()
+  emitter, counters = nil
+end
+
+local events = {
+  {'A',        'A'       };
+  {'A::B::*',  'A::B::C' };
+  {'A::B',     'A::*'    };
+  {'A::B',     '*::B'    };
+  {'A::*',     'A::*'    };
+  {'A::*::C',  'A::B::C' };
+  {'A::B::C',  'A::*::C' };
+  {'A::**::C', 'A::B::C' };
+}
+
+for _, event in ipairs(events) do
+
+  it('should remove `' .. event[2] .. '` with mask `' .. event[1] ..  '` from tree emitter', function()
+    emitter = EventEmitter.new{wildcard = true; delimiter = '::'}
+
+    local mask, event = event[1],  event[2]
+    local function listner()
+      emitter:off(mask, listner)
+      counters'e0'()
+    end
+    emitter:on(mask, listner)
+    assert_pass(function() emitter:emit(event) end)
+    assert_equal(1, counters.e0)
+    assert_pass(function() emitter:emit(event) end)
+    assert_equal(1, counters.e0)
+  end)
+
+end
+
+it('should remove any event', function()
+  emitter = EventEmitter.new()
+
+  local function listner()
+    emitter:offAny(listner)
+    counters'e0'()
+  end
+  emitter:onAny(listner)
+  assert_pass(function() emitter:emit('A') end)
+  assert_equal(1, counters.e0)
+  assert_pass(function() emitter:emit('A') end)
+  assert_equal(1, counters.e0)
+end)
+
+it('should remove event from basic emitter', function()
+  emitter = EventEmitter.new()
+
+  local event = 'A'
+  local function listner()
+    emitter:off(event, listner)
+    counters'e0'()
+  end
+  emitter:on(event, listner)
+  assert_pass(function() emitter:emit(event) end)
+  assert_equal(1, counters.e0)
+  assert_pass(function() emitter:emit(event) end)
+  assert_equal(1, counters.e0)
+end)
+
+end
+
 RUN()

@@ -23,6 +23,10 @@ local function callable(f)
   return type(f) == 'function'
 end
 
+local function empty(t)
+  return (not t) or (nil == next(t))
+end
+
 local BasicEventEmitter = ut.class() do
 
 local ANY_EVENT = {}
@@ -256,7 +260,7 @@ local function find_emitter(self, event, create, node, cb, ...)
   end
 
   local ret = find_emitter(self, tail, create, tree, cb, ...)
-  if (not create) and (nil == next(tree)) then
+  if (not create) and empty(tree) then
     node[name] = nil
   end
 
@@ -298,7 +302,9 @@ local function do_emit(self, wld, event, node, ...)
         emitter:_emit_impl(false, AN2, ...)
         emitter:emit(event, ...)
       end
-      if emitter:_empty() then node[1] = nil end
+      if emitter:_empty() then
+        node[1] = nil
+      end
     end
     
 
@@ -311,7 +317,9 @@ local function do_emit(self, wld, event, node, ...)
       else
         emitter:emit(event, ...)
       end
-      if emitter:_empty() then node[1] = nil end
+      if emitter:_empty() then
+        node[1] = nil
+      end
     end
 
     return self
@@ -321,7 +329,9 @@ local function do_emit(self, wld, event, node, ...)
   -- we have call this listener for node `A`
   if node[1] then
     node[1]:_emit_impl(false, AN2, ...)
-    if node[1]:_empty() then node[1] = nil end
+    if node[1]:_empty() then
+      node[1] = nil
+    end
   end
 
   -- wld = true if current node has mask == '**'
@@ -333,25 +343,34 @@ local function do_emit(self, wld, event, node, ...)
     -- e.g. we have mask='A::**::B' and event='A::B'
     -- so here name = 'A', tail = 'B' so we have to use `event`
     do_emit(self, true, event, node[self._wl2], ...)
-    if nil == next(node[self._wl2]) then node[self._wl2] = nil end
+    if empty(node[self._wl2]) then
+      node[self._wl2] = nil
+    end
   end
 
   -- here we handle wildcard in mask like `A::*::B`
   if node[self._wld] then
     do_emit(self, false, tail, node[self._wld], ...)
-    if nil == next(node[self._wld]) then node[self._wld] = nil end
+    if empty(node[self._wld]) then
+      node[self._wld] = nil
+    end
   end
 
   -- check if event has wildcard like `A::*`
   if name == self._wld then
     for k, v in pairs(node) do if (k ~= 1) and (k ~= self._wld) and (k ~= self._wl2) then
       do_emit(self, false, tail, v, ...)
-      if nil == next(v) then node[k] = nil end
+      if empty(v) then
+        node[k] = nil
+      end
     end end
   else
     if node[name] then
       do_emit(self, false, tail, node[name], ...)
-      if nil == next(node[name]) then node[name] = nil end
+      -- listener can remove self from EE so there may be no `node[name]` any more
+      if empty(node[name]) then
+        node[name] = nil
+      end
     end
   end
 
@@ -398,6 +417,13 @@ do -- Debug code
 -- server:emit('A::B')
 -- server:emit('A::*')
 -- server:emit('A::B::C')
+
+-- local function h()
+--   server:off('A::B', h);
+-- end
+-- server:on('A::B',   h);
+-- server:emit('*::B')
+
 end
 
 local EventEmitter = ut.class() do
