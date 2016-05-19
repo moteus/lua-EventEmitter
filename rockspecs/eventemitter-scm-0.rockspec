@@ -3,7 +3,7 @@ version = "scm-0"
 
 source = {
   url = "https://github.com/moteus/lua-EventEmitter/archive/master.zip",
-  dir = "lua-gntp-master",
+  dir = "lua-EventEmitter-master",
 }
 
 description = {
