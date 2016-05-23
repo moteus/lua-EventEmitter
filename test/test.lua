@@ -956,6 +956,47 @@ it('should remove any event', function()
   assert_equal(1, counters.e0)
 end)
 
+it('should call once any event', function()
+  emitter = EventEmitter.new{wildcard = true; delimiter = '::'}
+
+  emitter:onceAny(counters'e0')
+  assert_pass(function() emitter:emit('A') end)
+  assert_equal(1, counters.e0)
+  assert_pass(function() emitter:emit('A') end)
+  assert_equal(1, counters.e0)
+end)
+
+it('should off any event', function()
+  emitter = EventEmitter.new{wildcard = true; delimiter = '::'}
+
+  emitter:onAny(counters'e0')
+  emitter:onAny(counters'e1')
+  emitter:offAny(counters'e0')
+
+  assert_pass(function() emitter:emit('A') end)
+  assert_equal(0, counters.e0)
+  assert_equal(1, counters.e1)
+  assert_pass(function() emitter:emit('A') end)
+  assert_equal(0, counters.e0)
+  assert_equal(2, counters.e1)
+end)
+
+it('should off all any event', function()
+  emitter = EventEmitter.new{wildcard = true; delimiter = '::'}
+
+  emitter:onAny(counters'e0')
+  emitter:onAny(counters'e1')
+  emitter:offAny()
+
+  assert_pass(function() emitter:emit('A') end)
+  assert_equal(0, counters.e0)
+  assert_equal(0, counters.e1)
+
+  assert_pass(function() emitter:emit('A') end)
+  assert_equal(0, counters.e0)
+  assert_equal(0, counters.e1)
+end)
+
 it('should remove event from basic emitter', function()
   emitter = EventEmitter.new()
 
