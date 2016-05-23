@@ -929,6 +929,17 @@ for _, event in ipairs(events) do
     assert_equal(1, counters.e0)
   end)
 
+  it('should call once `' .. event[2] .. '` with mask `' .. event[1] ..  '` from tree emitter', function()
+    emitter = EventEmitter.new{wildcard = true; delimiter = '::'}
+
+    local mask, event = event[1],  event[2]
+    emitter:once(mask, counters'e0')
+    assert_pass(function() emitter:emit(event) end)
+    assert_equal(1, counters.e0)
+    assert_pass(function() emitter:emit(event) end)
+    assert_equal(1, counters.e0)
+  end)
+
 end
 
 it('should remove any event', function()

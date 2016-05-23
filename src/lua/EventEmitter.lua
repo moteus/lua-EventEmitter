@@ -522,7 +522,7 @@ local extend, wrap do
 
 local exports = {'on', 'many', 'once', 'off', 'emit', 'onAny', 'manyAny', 'onceAny', 'offAny'}
 
-function extend(class)
+extend = function(class)
   for _, method in ipairs(exports) do
     class[method] = function(self, ...)
       return self._EventEmitter[method](self._EventEmitter, ...)
@@ -531,7 +531,7 @@ function extend(class)
   return class
 end
 
-function wrap(object, emitter)
+wrap = function(object, emitter)
   emitter = emitter or EventEmitter.new{self = object}
   for _, method in ipairs(exports) do
     object[method] = function(self, ...)
