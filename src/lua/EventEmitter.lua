@@ -317,7 +317,7 @@ local function do_emit(self, wld, event, node, ...)
         emitter:emit(event, ...)
       end
       if emitter:_empty() then
-        node[1] = nil
+        node[self._wl2][1] = nil
       end
     end
     
