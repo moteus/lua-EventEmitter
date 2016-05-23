@@ -337,7 +337,7 @@ local function do_emit(self, wld, event, node, ...)
   -- we have call this listener for node `A`
   if node[1] then
     node[1]:_emit_impl(false, AN2, ...)
-    if node[1]:_empty() then
+    if node[1] and node[1]:_empty() then
       node[1] = nil
     end
   end
