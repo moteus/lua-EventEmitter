@@ -306,19 +306,27 @@ local function do_emit(self, wld, event, node, ...)
         node[1] = nil
       end
     end
-    
 
     -- match mask `**` to event
     -- e.g. origin mask is 'A::**::B' and event is 'A::B'
     emitter = node[self._wl2] and node[self._wl2][1]
     if emitter then
-      if event ~= self._wld then
+      if event == self._wld then
         emitter:_emit_all()
       else
         emitter:emit(event, ...)
       end
       if emitter:_empty() then
         node[1] = nil
+      end
+    end
+    
+    -- match mask 'A::**' to event 'A'
+    emitter = node[name] and node[name][1]
+    if emitter then
+      emitter:_emit_impl(false, AN2, ...)
+      if emitter:_empty() then
+        node[name][1] = nil
       end
     end
 

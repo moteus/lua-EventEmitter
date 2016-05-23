@@ -601,11 +601,48 @@ it('should match wildcard in events', function()
   emitter:on('A::*',     counters'e1');
   emitter:on('A::**',    counters'e2');
   emitter:on('A::**::C', counters'e3');
-  emitter:emit('A::*')
 
+  emitter:emit('A::*')
   assert_equal(0, counters.e0)
   assert_equal(1, counters.e1)
   assert_equal(1, counters.e2)
+  assert_equal(1, counters.e3)
+
+  emitter:emit('A::C')
+  assert_equal(0, counters.e0)
+  assert_equal(2, counters.e1)
+  assert_equal(2, counters.e2)
+  assert_equal(2, counters.e3)
+
+  emitter:emit('A::*::C')
+  assert_equal(0, counters.e0)
+  assert_equal(2, counters.e1)
+  assert_equal(3, counters.e2)
+  assert_equal(3, counters.e3)
+end)
+
+it('should match prefix with wildcard in events', function()
+  emitter:on('A',        counters'e0');
+  emitter:on('A::*',     counters'e1');
+  emitter:on('A::**',    counters'e2');
+  emitter:on('A::**::C', counters'e3');
+
+  emitter:emit('B::*')
+  assert_equal(0, counters.e0)
+  assert_equal(0, counters.e1)
+  assert_equal(0, counters.e2)
+  assert_equal(0, counters.e3)
+
+  emitter:emit('B::C')
+  assert_equal(0, counters.e0)
+  assert_equal(0, counters.e1)
+  assert_equal(0, counters.e2)
+  assert_equal(0, counters.e3)
+
+  emitter:emit('B::*::C')
+  assert_equal(0, counters.e0)
+  assert_equal(0, counters.e1)
+  assert_equal(0, counters.e2)
   assert_equal(0, counters.e3)
 end)
 
@@ -661,6 +698,70 @@ it('test 4', function()
 
   assert_equal(1, counters.e0)
   assert_equal(0, counters.e1)
+end)
+
+it('test 4.1', function()
+  emitter:on('**',         counters'e0');
+  emitter:on('::**',       counters'e1');
+  emitter:emit('')
+
+  assert_equal(1, counters.e0)
+  assert_equal(1, counters.e1)
+end)
+
+it('test 5', function()
+  emitter:on('A::**',      counters'e0');
+  emitter:on('A::*',       counters'e1');
+  emitter:emit('A')
+
+  assert_equal(1, counters.e0)
+  assert_equal(0, counters.e1)
+end)
+
+it('test 6', function()
+  emitter:on('A::**::C',   counters'e0');
+  emitter:on('A::*',       counters'e1');
+  emitter:emit('A::B')
+
+  assert_equal(0, counters.e0)
+  assert_equal(1, counters.e1)
+end)
+
+it('test 7', function()
+  emitter:on('A::**::C',   counters'e0');
+  emitter:on('A::*',       counters'e1');
+  emitter:emit('A::C')
+
+  assert_equal(1, counters.e0)
+  assert_equal(1, counters.e1)
+end)
+
+it('test 8', function()
+  emitter:on('A::**::C',   counters'e0');
+  emitter:on('A::*',       counters'e1');
+  emitter:emit('A::B::C')
+
+  assert_equal(1, counters.e0)
+  assert_equal(0, counters.e1)
+end)
+
+it('test 9', function()
+  emitter:on('A::**',   counters'e0');
+
+  emitter:emit('A')
+  assert_equal(1, counters.e0)
+
+  emitter:emit('A::B')
+  assert_equal(2, counters.e0)
+
+  emitter:emit('A::*')
+  assert_equal(3, counters.e0)
+
+  emitter:emit('B')
+  assert_equal(3, counters.e0)
+
+  emitter:emit('B::A')
+  assert_equal(3, counters.e0)
 end)
 
 end
