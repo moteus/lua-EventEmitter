@@ -1031,6 +1031,95 @@ it('should remove event from basic emitter', function()
   assert_equal(1, counters.e0)
 end)
 
+it('should remove all events from basic emitter', function()
+  emitter = EventEmitter.new()
+
+  emitter:on   ('A', counters'e0')
+  emitter:once ('B', counters'e1')
+  emitter:onAny(     counters'e2')
+
+  assert_equal(emitter, emitter:removeAllListeners())
+  
+  assert_false(emitter:emit('A'))
+  assert_false(emitter:emit('B'))
+  assert_false(emitter:emit('C'))
+
+  assert_equal(0, counters.e0)
+  assert_equal(0, counters.e1)
+  assert_equal(0, counters.e2)
+end)
+
+it('should remove all listners from event from basic emitter', function()
+  emitter = EventEmitter.new()
+
+  emitter:on ('A', counters'e0')
+  emitter:on ('A', counters'e1')
+  emitter:on ('B', counters'e2')
+
+  assert_equal(emitter, emitter:removeAllListeners('A'))
+  
+  assert_false(emitter:emit('A'))
+  assert_true(emitter:emit('B'))
+
+  assert_equal(0, counters.e0)
+  assert_equal(0, counters.e1)
+  assert_equal(1, counters.e2)
+end)
+
+it('should remove all events from tree emitter', function()
+  emitter = EventEmitter.new{wildcard = true; delimiter = '::'}
+
+  emitter:on   ('A', counters'e0')
+  emitter:once ('B', counters'e1')
+  emitter:onAny(     counters'e2')
+
+  assert_equal(emitter, emitter:removeAllListeners())
+  
+  assert_false(emitter:emit('A'))
+  assert_false(emitter:emit('B'))
+  assert_false(emitter:emit('C'))
+
+  assert_equal(0, counters.e0)
+  assert_equal(0, counters.e1)
+  assert_equal(0, counters.e2)
+end)
+
+it('should remove all listners from event from tree emitter', function()
+  emitter = EventEmitter.new{wildcard = true; delimiter = '::'}
+
+  emitter:on ('A',    counters'e0')
+  emitter:on ('A',    counters'e1')
+  emitter:on ('A::*', counters'e2')
+
+  assert_equal(emitter, emitter:removeAllListeners('A'))
+  
+  assert_false(emitter:emit('A'))
+  assert_true(emitter:emit('A::B'))
+
+  assert_equal(0, counters.e0)
+  assert_equal(0, counters.e1)
+  assert_equal(1, counters.e2)
+end)
+
+it('should remove all listners from event with mask from tree emitter', function()
+  emitter = EventEmitter.new{wildcard = true; delimiter = '::'}
+
+  emitter:on ('A',    counters'e0')
+  emitter:on ('A',    counters'e1')
+  emitter:on ('A::*', counters'e2')
+  emitter:on ('A::B', counters'e3')
+
+  assert_equal(emitter, emitter:removeAllListeners('A::*'))
+  
+  assert_true(emitter:emit('A'))
+  assert_true(emitter:emit('A::B'))
+
+  assert_equal(1, counters.e0)
+  assert_equal(1, counters.e1)
+  assert_equal(0, counters.e2)
+  assert_equal(1, counters.e3)
+end)
+
 end
 
 RUN()

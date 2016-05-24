@@ -175,6 +175,17 @@ function BasicEventEmitter:_empty()
   return nil == next(self._handlers)
 end
 
+function BasicEventEmitter:removeAllListeners(eventName)
+  if not eventName then
+    self._handlers = {}
+    self._once     = {}
+  else
+    self:off(eventName)
+  end
+
+  return self
+end
+
 end
 
 local TreeEventEmitter = ut.class() do
@@ -416,6 +427,17 @@ function TreeEventEmitter:offAny(handler)
   return self
 end
 
+function TreeEventEmitter:removeAllListeners(eventName)
+  if not eventName then
+    self._any:removeAllListeners()
+    self._tree = {}
+  else
+    self:off(eventName)
+  end
+
+  return self
+end
+
 end
 
 do -- Debug code
@@ -520,6 +542,17 @@ function EventEmitter:offAny(listener)
   self._EventEmitter:offAny(listener)
   return self
 end
+
+function EventEmitter:removeAllListeners(eventName)
+  self._EventEmitter:removeAllListeners(eventName)
+  return self
+end
+
+-- aliases
+
+EventEmitter.addListener    = EventEmitter.on
+
+EventEmitter.removeListener = EventEmitter.off
 
 end
 
