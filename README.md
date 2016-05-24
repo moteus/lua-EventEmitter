@@ -47,3 +47,26 @@ server:on('accept', function() ... end)
 server:emit('accept', host, port)
 ```
 
+## Incompatabilities with [EventEmitter2](https://github.com/asyncly/EventEmitter2)
+
+1. JS Allow register same function for same event multiple times.
+```JS
+server.on('A', test);
+server.on('A', test);
+server.emit('A')       // `test` called twice
+```
+
+2. If event has wildcard followed by soem value then mult-level wildcard does not works
+```JS
+server.on('foo.**', test);
+server.emit('foo.*')       // called
+server.emit('foo.*.bar')   // not called
+```
+
+3. In JS Multi-level key in middle of mask does not allo zero match with wildcard event.
+```JS
+server.on('foo.**.bar', test);
+server.emit('foo.*')   // not called
+server.emit('foo.bar') // called
+```
+

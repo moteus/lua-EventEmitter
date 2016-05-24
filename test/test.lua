@@ -102,7 +102,7 @@ it('should pass self and event', function()
     assert_equal('hello', value)
   end)
 
-  emitter:emit('A.B', 'hello')
+  assert_true(emitter:emit('A.B', 'hello'))
 
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
@@ -123,7 +123,7 @@ it('should pass self and event with wildcard', function()
     assert_equal('hello', value)
   end)
 
-  emitter:emit('A', 'hello')
+  assert_true(emitter:emit('A', 'hello'))
 
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
@@ -140,7 +140,7 @@ it('emit should pass custom self', function()
     assert_equal('hello', self)
     counters'e1'()
   end)
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
 end)
@@ -215,27 +215,27 @@ end
 
 it('should call only once', function()
   emitter:once('A', counters'e0')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
-  emitter:emit('A')
+  assert_false(emitter:emit('A'))
   assert_equal(1, counters.e0)
 end)
 
 it('should call many time', function()
   emitter:on('A', counters'e0')
   for i = 1, 5 do
-    emitter:emit('A')
+    assert_true(emitter:emit('A'))
     assert_equal(i, counters.e0)
   end
 end)
 
 it('should remove many', function()
   emitter:on('A', counters'e0')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
 
   emitter:off('A', counters'e0')
-  emitter:emit('A')
+  assert_false(emitter:emit('A'))
   assert_equal(1, counters.e0)
 end)
 
@@ -243,7 +243,7 @@ it('should remove once', function()
   emitter:once('A', counters'e0')
   emitter:once('A', counters'e1')
   emitter:off('A', counters'e0')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(0, counters.e0)
   assert_equal(1, counters.e1)
 end)
@@ -252,7 +252,7 @@ it('should remove all', function()
   emitter:once('A', counters'e0')
   emitter:on('A',   counters'e1')
   emitter:off('A')
-  emitter:emit('A')
+  assert_false(emitter:emit('A'))
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
 end)
@@ -261,7 +261,7 @@ it('should remove by handler once', function()
   emitter:once('A', counters'e0')
   emitter:on('A',   counters'e1')
   emitter:off('A', counters'e0')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(0, counters.e0)
   assert_equal(1, counters.e1)
 end)
@@ -270,7 +270,7 @@ it('should remove by handler on', function()
   emitter:once('A', counters'e0')
   emitter:on('A',   counters'e1')
   emitter:off('A', counters'e1')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(0, counters.e1)
 end)
@@ -279,11 +279,11 @@ it('should call multimple subscrabers', function()
   emitter:once('A', counters'e0')
   emitter:on('A',   counters'e1')
 
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
 
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(2, counters.e1)
 end)
@@ -292,7 +292,7 @@ it('should call any handler', function()
   emitter:once ('A', counters'e0')
   emitter:on   ('A', counters'e1')
   emitter:onAny(     counters'e2')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
   assert_equal(1, counters.e2)
@@ -302,7 +302,7 @@ it('should call any handler for unknown event', function()
   emitter:once ('A', counters'e0')
   emitter:on   ('A', counters'e1')
   emitter:onAny(     counters'e2')
-  emitter:emit('B')
+  assert_true(emitter:emit('B'))
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
   assert_equal(1, counters.e2)
@@ -313,7 +313,7 @@ it('should remove any handler', function()
   emitter:on   ('A', counters'e1')
   emitter:onAny(     counters'e2')
   emitter:offAny(    counters'e2')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
   assert_equal(0, counters.e2)
@@ -324,12 +324,12 @@ it('should call any handler only once', function()
   emitter:on     ('A', counters'e1')
   emitter:onceAny(     counters'e2')
 
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
   assert_equal(1, counters.e2)
 
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(2, counters.e1)
   assert_equal(1, counters.e2)
@@ -341,7 +341,7 @@ it('should remove once any handler', function()
   emitter:onceAny(     counters'e2')
   emitter:offAny(      counters'e2')
 
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
   assert_equal(0, counters.e2)
@@ -366,7 +366,7 @@ end
 it('should match only base', function()
   emitter:on('A',    counters'e0')
   emitter:on('A::*', counters'e1')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(0, counters.e1)
 end)
@@ -374,7 +374,7 @@ end)
 it('should match only subclass', function()
   emitter:on('A',    counters'e0')
   emitter:on('A::*', counters'e1')
-  emitter:emit('A::1')
+  assert_true(emitter:emit('A::1'))
   assert_equal(0, counters.e0)
   assert_equal(1, counters.e1)
 end)
@@ -383,7 +383,7 @@ it('should match only subclass 2', function()
   emitter:on('A',       counters'e0')
   emitter:on('A::*',    counters'e1')
   emitter:on('A::1::*', counters'e2')
-  emitter:emit('A::1::2')
+  assert_true(emitter:emit('A::1::2'))
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
   assert_equal(1, counters.e2)
@@ -397,7 +397,7 @@ it('should match wildcard in the middle of emit', function()
   emitter:on('A::B::*', counters'e4')
   emitter:on('A::*::C', counters'e5')
 
-  emitter:emit('A::*::C')
+  assert_true(emitter:emit('A::*::C'))
 
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
@@ -415,7 +415,7 @@ it('should match wildcard in the end of emit', function()
   emitter:on('A::B::*', counters'e4')
   emitter:on('A::*::C', counters'e5')
 
-  emitter:emit('A::*')
+  assert_true(emitter:emit('A::*'))
 
   assert_equal(0, counters.e0)
   assert_equal(1, counters.e1)
@@ -433,7 +433,7 @@ it('should match wildcard at level', function()
   emitter:on('A::B::*', counters'e4')
   emitter:on('A::*::C', counters'e5')
 
-  emitter:emit('A::*::*')
+  assert_true(emitter:emit('A::*::*'))
 
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
@@ -451,10 +451,10 @@ it('should count events with wildcard', function()
   emitter:many('A::B::*', 2, counters'e4')
   emitter:many('A::*::C', 3, counters'e5')
 
-  emitter:emit('A::B::*')
-  emitter:emit('A::*::*')
-  emitter:emit('A::*::C')
-  emitter:emit('A::B::C')
+  assert_true(emitter:emit('A::B::*'))
+  assert_true(emitter:emit('A::*::*'))
+  assert_true(emitter:emit('A::*::C'))
+  assert_false(emitter:emit('A::B::C'))
 
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
@@ -469,10 +469,10 @@ it('should count any events', function()
   emitter:manyAny(2, counters'e1')
   emitter:manyAny(3, counters'e2')
 
-  emitter:emit('A')
-  emitter:emit('B')
-  emitter:emit('C')
-  emitter:emit('D')
+  assert_true(emitter:emit('A'))
+  assert_true(emitter:emit('B'))
+  assert_true(emitter:emit('C'))
+  assert_false(emitter:emit('D'))
 
   assert_equal(1, counters.e0)
   assert_equal(2, counters.e1)
@@ -484,43 +484,43 @@ it('should calls handle only once', function()
   emitter:on('A',    counters'e0')
   emitter:on('A::*', counters'e0')
   emitter:on('A::*', counters'e0')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
 end)
 
 it('should remove once listners', function()
   emitter:once('A',    counters'e0')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
-  emitter:emit('A')
+  assert_false(emitter:emit('A'))
   assert_equal(1, counters.e0)
 end)
 
 it('should remove onceAny listners', function()
   emitter:onceAny(counters'e0')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
-  emitter:emit('A')
+  assert_false(emitter:emit('A'))
   assert_equal(1, counters.e0)
 end)
 
 it('should remove many listners', function()
   emitter:many('A', 2, counters'e0')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(2, counters.e0)
-  emitter:emit('A')
+  assert_false(emitter:emit('A'))
   assert_equal(2, counters.e0)
 end)
 
 it('should remove manyAny listners', function()
   emitter:manyAny(2, counters'e0')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(2, counters.e0)
-  emitter:emit('A')
+  assert_false(emitter:emit('A'))
   assert_equal(2, counters.e0)
 end)
 
@@ -528,28 +528,28 @@ it('should match top wildcard', function()
   emitter:on('*',   counters'e0')
   emitter:on('::*', counters'e1')
 
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(0, counters.e1)
 
-  emitter:emit('A::B')
+  assert_false(emitter:emit('A::B'))
   assert_equal(1, counters.e0)
   assert_equal(0, counters.e1)
 end)
 
 it('shold ignore unmatched', function()
   emitter:on('A::*', counters'e0')
-  emitter:emit('B')
+  assert_false(emitter:emit('B'))
   assert_equal(0, counters.e0)
   emitter:off('A::*', counters'e0')
 
   emitter:on('A::B::*', counters'e0')
-  emitter:emit('A::C')
+  assert_false(emitter:emit('A::C'))
   assert_equal(0, counters.e0)
   emitter:off('A::B::*', counters'e0')
 
   emitter:on('A::B::C::*', counters'e0')
-  emitter:emit('B::C')
+  assert_false(emitter:emit('B::C'))
   assert_equal(0, counters.e0)
   emitter:off('A::B::C::*', counters'e0')
 end)
@@ -575,7 +575,7 @@ it('should match end char', function()
   emitter:on('A::*',     counters'e1');
   emitter:on('A::**',    counters'e2');
   emitter:on('A::**::C', counters'e3');
-  emitter:emit('A::B::C')
+  assert_true(emitter:emit('A::B::C'))
 
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
@@ -588,7 +588,7 @@ it('should match empty string as wildcard', function()
   emitter:on('A::*',     counters'e1');
   emitter:on('A::**',    counters'e2');
   emitter:on('A::**::C', counters'e3');
-  emitter:emit('A::C')
+  assert_true(emitter:emit('A::C'))
 
   assert_equal(0, counters.e0)
   assert_equal(1, counters.e1)
@@ -602,19 +602,19 @@ it('should match wildcard in events', function()
   emitter:on('A::**',    counters'e2');
   emitter:on('A::**::C', counters'e3');
 
-  emitter:emit('A::*')
+  assert_true(emitter:emit('A::*'))
   assert_equal(0, counters.e0)
   assert_equal(1, counters.e1)
   assert_equal(1, counters.e2)
   assert_equal(1, counters.e3)
 
-  emitter:emit('A::C')
+  assert_true(emitter:emit('A::C'))
   assert_equal(0, counters.e0)
   assert_equal(2, counters.e1)
   assert_equal(2, counters.e2)
   assert_equal(2, counters.e3)
 
-  emitter:emit('A::*::C')
+  assert_true(emitter:emit('A::*::C'))
   assert_equal(0, counters.e0)
   assert_equal(2, counters.e1)
   assert_equal(3, counters.e2)
@@ -627,19 +627,19 @@ it('should match prefix with wildcard in events', function()
   emitter:on('A::**',    counters'e2');
   emitter:on('A::**::C', counters'e3');
 
-  emitter:emit('B::*')
+  assert_false(emitter:emit('B::*'))
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
   assert_equal(0, counters.e2)
   assert_equal(0, counters.e3)
 
-  emitter:emit('B::C')
+  assert_false(emitter:emit('B::C'))
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
   assert_equal(0, counters.e2)
   assert_equal(0, counters.e3)
 
-  emitter:emit('B::*::C')
+  assert_false(emitter:emit('B::*::C'))
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
   assert_equal(0, counters.e2)
@@ -652,7 +652,7 @@ it('test 1', function()
   emitter:on('A::**',      counters'e2');
   emitter:on('A::**::B',   counters'e3');
   emitter:on('A::**::B::C',counters'e4');
-  emitter:emit('A::B::C')
+  assert_true(emitter:emit('A::B::C'))
 
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
@@ -667,7 +667,7 @@ it('test 2', function()
   emitter:on('A::**',      counters'e2');
   emitter:on('A::**::B',   counters'e3');
   emitter:on('A::**::B::C',counters'e4');
-  emitter:emit('A::G::B::C')
+  assert_true(emitter:emit('A::G::B::C'))
 
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
@@ -682,7 +682,7 @@ it('test 3', function()
   emitter:on('A::**',      counters'e2');
   emitter:on('A::**::B',   counters'e3');
   emitter:on('A::**::B::*',counters'e4');
-  emitter:emit('A::B::C')
+  assert_true(emitter:emit('A::B::C'))
 
   assert_equal(0, counters.e0)
   assert_equal(0, counters.e1)
@@ -694,7 +694,7 @@ end)
 it('test 4', function()
   emitter:on('**',         counters'e0');
   emitter:on('::**',       counters'e1');
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
 
   assert_equal(1, counters.e0)
   assert_equal(0, counters.e1)
@@ -703,7 +703,7 @@ end)
 it('test 4.1', function()
   emitter:on('**',         counters'e0');
   emitter:on('::**',       counters'e1');
-  emitter:emit('')
+  assert_true(emitter:emit(''))
 
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
@@ -712,7 +712,7 @@ end)
 it('test 5', function()
   emitter:on('A::**',      counters'e0');
   emitter:on('A::*',       counters'e1');
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
 
   assert_equal(1, counters.e0)
   assert_equal(0, counters.e1)
@@ -721,7 +721,7 @@ end)
 it('test 6', function()
   emitter:on('A::**::C',   counters'e0');
   emitter:on('A::*',       counters'e1');
-  emitter:emit('A::B')
+  assert_true(emitter:emit('A::B'))
 
   assert_equal(0, counters.e0)
   assert_equal(1, counters.e1)
@@ -730,7 +730,7 @@ end)
 it('test 7', function()
   emitter:on('A::**::C',   counters'e0');
   emitter:on('A::*',       counters'e1');
-  emitter:emit('A::C')
+  assert_true(emitter:emit('A::C'))
 
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
@@ -739,7 +739,7 @@ end)
 it('test 8', function()
   emitter:on('A::**::C',   counters'e0');
   emitter:on('A::*',       counters'e1');
-  emitter:emit('A::B::C')
+  assert_true(emitter:emit('A::B::C'))
 
   assert_equal(1, counters.e0)
   assert_equal(0, counters.e1)
@@ -748,19 +748,19 @@ end)
 it('test 9', function()
   emitter:on('A::**',   counters'e0');
 
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
 
-  emitter:emit('A::B')
+  assert_true(emitter:emit('A::B'))
   assert_equal(2, counters.e0)
 
-  emitter:emit('A::*')
+  assert_true(emitter:emit('A::*'))
   assert_equal(3, counters.e0)
 
-  emitter:emit('B')
+  assert_false(emitter:emit('B'))
   assert_equal(3, counters.e0)
 
-  emitter:emit('B::A')
+  assert_false(emitter:emit('B::A'))
   assert_equal(3, counters.e0)
 end)
 
@@ -768,11 +768,11 @@ it('test 10', function()
   emitter:on  ('A::B',     counters'e0');
   emitter:once('A::**::B', counters'e1');
 
-  emitter:emit('A::B')
+  assert_true(emitter:emit('A::B'))
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
 
-  emitter:emit('A::B')
+  assert_true(emitter:emit('A::B'))
   assert_equal(2, counters.e0)
   assert_equal(1, counters.e1)
 end)
@@ -781,13 +781,32 @@ it('test 11', function()
   emitter:on  ('A',     counters'e0');
   emitter:once('A::**', counters'e1');
 
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
   assert_equal(1, counters.e1)
 
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(2, counters.e0)
   assert_equal(1, counters.e1)
+end)
+
+it('test 12', function()
+  emitter:on('A::**::B', counters'e0');
+
+  assert_true(emitter:emit('A::*::B'))
+  assert_equal(1, counters.e0)
+
+  assert_true(emitter:emit('A::*::*::B'))
+  assert_equal(2, counters.e0)
+
+  assert_true(emitter:emit('A::C::*::B'))
+  assert_equal(3, counters.e0)
+
+  assert_true(emitter:emit('A::*::B::B'))
+  assert_equal(4, counters.e0)
+
+  assert_true(emitter:emit('A::*::B::*'))
+  assert_equal(5, counters.e0)
 end)
 
 end
@@ -828,7 +847,7 @@ it("extend class shold work", function()
   emitter = CustomClass.new()
 
   emitter:on('A', counters'e0')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
 end)
 
@@ -847,7 +866,7 @@ it("extend class shold pass correct self", function()
     counters'e0'()
   end)
 
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
 
   assert_equal(1, counters.e0)
 end)
@@ -866,7 +885,7 @@ end)
 it("extend object should work", function()
   emitter = EventEmitter.extend_object(ut.class{}.new())
   emitter:on('A', counters'e0')
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
   assert_equal(1, counters.e0)
 end)
 
@@ -879,7 +898,7 @@ it("extend object shold pass correct self", function()
     counters'e0'()
   end)
 
-  emitter:emit('A')
+  assert_true(emitter:emit('A'))
 
   assert_equal(1, counters.e0)
 end)

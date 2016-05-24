@@ -130,8 +130,10 @@ function BasicEventEmitter:offAny(handler)
 end
 
 function BasicEventEmitter:_emit_impl(call_any, event, ...)
+  local ret = false
+
   if call_any and ANY_EVENT ~= event then
-    self:_emit_impl(false, ANY_EVENT, ...)
+    ret = self:_emit_impl(false, ANY_EVENT, ...) or ret
   end
 
   local list = self._handlers[event]
@@ -141,11 +143,12 @@ function BasicEventEmitter:_emit_impl(call_any, event, ...)
       if list[i] then
         -- we need this check because cb could remove some listeners
         list[i](...)
+        ret = true
       end
     end
   end
 
-  return self
+  return ret
 end
 
 function BasicEventEmitter:emit(event, ...)
@@ -160,11 +163,12 @@ function BasicEventEmitter:_emit_all(...)
     names[#names+1] = name
   end
 
+  local ret = false
   for i = 1, #names do
-    self:_emit_impl(false, names[i], ...)
+    ret = self:_emit_impl(false, names[i], ...) or ret
   end
 
-  return self
+  return ret
 end
 
 function BasicEventEmitter:_empty()
@@ -288,7 +292,9 @@ function TreeEventEmitter:off(event, ...)
 end
 
 local function do_emit(self, wld, event, node, ...)
-  if not node then return end
+  local ret = false
+
+  if not node then return ret end
 
   local name, tail = ut.split_first(event, self._sep, true)
 
@@ -297,10 +303,10 @@ local function do_emit(self, wld, event, node, ...)
     local emitter = node[1]
     if emitter then
       if event == self._wld then
-        emitter:_emit_all()
+        ret = emitter:_emit_all() or ret
       else
-        emitter:_emit_impl(false, AN2, ...)
-        emitter:emit(event, ...)
+        ret = emitter:_emit_impl(false, AN2, ...) or ret
+        ret = emitter:emit(event, ...) or ret
       end
       if emitter:_empty() then
         node[1] = nil
@@ -312,31 +318,31 @@ local function do_emit(self, wld, event, node, ...)
     emitter = node[self._wl2] and node[self._wl2][1]
     if emitter then
       if event == self._wld then
-        emitter:_emit_all()
+        ret = emitter:_emit_all() or ret
       else
-        emitter:emit(event, ...)
+        ret = emitter:emit(event, ...) or ret
       end
       if emitter:_empty() then
         node[self._wl2][1] = nil
       end
     end
-    
+
     -- match mask 'A::**' to event 'A'
     emitter = node[name] and node[name][1]
     if emitter then
-      emitter:_emit_impl(false, AN2, ...)
+      ret = emitter:_emit_impl(false, AN2, ...) or ret
       if emitter:_empty() then
         node[name][1] = nil
       end
     end
 
-    return self
+    return ret
   end
 
   -- if we have mask like `A::**` and emit event say `A::B::C` then
   -- we have call this listener for node `A`
   if node[1] then
-    node[1]:_emit_impl(false, AN2, ...)
+    ret = node[1]:_emit_impl(false, AN2, ...) or ret
     if node[1] and node[1]:_empty() then
       node[1] = nil
     end
@@ -345,12 +351,12 @@ local function do_emit(self, wld, event, node, ...)
   -- wld = true if current node has mask == '**'
   if wld then
     -- we should keep looking tail in current node
-    do_emit(self, true, tail, node, ...)
+    ret = do_emit(self, true, tail, node, ...) or ret
   elseif node[self._wl2] then
     -- we should start looking event in wildcard node
     -- e.g. we have mask='A::**::B' and event='A::B'
     -- so here name = 'A', tail = 'B' so we have to use `event`
-    do_emit(self, true, event, node[self._wl2], ...)
+    ret = do_emit(self, true, event, node[self._wl2], ...) or ret
     if empty(node[self._wl2]) then
       node[self._wl2] = nil
     end
@@ -358,7 +364,7 @@ local function do_emit(self, wld, event, node, ...)
 
   -- here we handle wildcard in mask like `A::*::B`
   if node[self._wld] then
-    do_emit(self, false, tail, node[self._wld], ...)
+    ret = do_emit(self, false, tail, node[self._wld], ...) or ret
     if empty(node[self._wld]) then
       node[self._wld] = nil
     end
@@ -367,14 +373,14 @@ local function do_emit(self, wld, event, node, ...)
   -- check if event has wildcard like `A::*`
   if name == self._wld then
     for k, v in pairs(node) do if (k ~= 1) and (k ~= self._wld) and (k ~= self._wl2) then
-      do_emit(self, false, tail, v, ...)
+      ret = do_emit(self, false, tail, v, ...) or ret
       if empty(v) then
         node[k] = nil
       end
     end end
   else
     if node[name] then
-      do_emit(self, false, tail, node[name], ...)
+      ret = do_emit(self, false, tail, node[name], ...) or ret
       -- listener can remove self from EE so there may be no `node[name]` any more
       if empty(node[name]) then
         node[name] = nil
@@ -382,12 +388,12 @@ local function do_emit(self, wld, event, node, ...)
     end
   end
 
-  return self
+  return ret
 end
 
 function TreeEventEmitter:emit(event, ...)
-  self._any:emit(ANY, ...)
-  return do_emit(self, false, event, self._tree, ...)
+  local ret = self._any:emit(ANY, ...)
+  return do_emit(self, false, event, self._tree, ...) or ret
 end
 
 function TreeEventEmitter:onAny(handler)
@@ -483,8 +489,7 @@ end
 function EventEmitter:emit(event, ...)
   assert(event, 'event expected')
 
-  self._EventEmitter:emit(event, self._EventEmitter_self, event, ...)
-  return self
+  return self._EventEmitter:emit(event, self._EventEmitter_self, event, ...)
 end
 
 function EventEmitter:onAny(listener)
