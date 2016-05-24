@@ -558,7 +558,9 @@ end
 
 local extend, wrap do
 
-local exports = {'on', 'many', 'once', 'off', 'emit', 'onAny', 'manyAny', 'onceAny', 'offAny'}
+local exports = {'on', 'many', 'once', 'off', 'emit', 'onAny', 'manyAny', 'onceAny', 'offAny',
+  'addListener', 'removeListener', 'removeAllListeners'
+}
 
 extend = function(class)
   for _, method in ipairs(exports) do

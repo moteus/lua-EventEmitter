@@ -83,6 +83,9 @@ it('emitter should has API', function()
   assert_function(emitter.offAny)
   assert_function(emitter.onceAny)
   assert_function(emitter.manyAny)
+  assert_function(emitter.addListener)
+  assert_function(emitter.removeListener)
+  assert_function(emitter.removeAllListeners)
 end)
 
 it('should pass self and event', function()
@@ -814,7 +817,8 @@ end
 local _ENV = TEST_CASE'EventEmitter extend' if ENABLE then
 local it = IT(_ENV or _M)
 
-local exports = {'on','many','once','off','emit','onAny','manyAny','onceAny','offAny'}
+local exports = {'on','many','once','off','emit','onAny','manyAny','onceAny','offAny',
+  'addListener', 'removeListener', 'removeAllListeners'}
 
 local emitter, counters
 
