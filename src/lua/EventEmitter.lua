@@ -333,8 +333,13 @@ local function do_emit(self, wld, event, node, ...)
       else
         ret = emitter:emit(event, ...) or ret
       end
-      if emitter:_empty() then
-        node[self._wl2][1] = nil
+      if node[self._wl2] then
+        if emitter:_empty() then
+          node[self._wl2][1] = nil
+        end
+        if empty(node[self._wl2]) then
+          node[self._wl2] = nil
+        end
       end
     end
 
@@ -441,7 +446,9 @@ end
 end
 
 do -- Debug code
--- local c = function(str) return function() print(str) end end
+
+-- local C = {}
+-- local c = function(str) C[str]= C[str] or function() print(str) end; return C[str] end
 -- local server = TreeEventEmitter.new('::')
 -- server:on('A',           c'e0');
 -- server:on('A::*',        c'e1');
@@ -454,11 +461,9 @@ do -- Debug code
 -- server:emit('A::*')
 -- server:emit('A::B::C')
 
--- local function h()
---   server:off('A::B', h);
--- end
--- server:on('A::B',   h);
--- server:emit('*::B')
+-- local function h() server:off('A::**::B', h) end
+-- server:on('A::**::B', h);
+-- server:emit('A::B')
 
 end
 
