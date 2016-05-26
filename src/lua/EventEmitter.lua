@@ -97,9 +97,9 @@ function BasicEventEmitter:off(event, handler)
 
   else
 
-    for _, handler in pairs(self._once) do
+    for handler, listener in pairs(self._once) do
       for i = 1, #list do
-        if list[i] == handler then
+        if list[i] == listener then
           self._once[handler] = nil
           break
         end
