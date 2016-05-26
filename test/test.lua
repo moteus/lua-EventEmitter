@@ -812,6 +812,22 @@ it('test 12', function()
   assert_equal(5, counters.e0)
 end)
 
+it('test 13', function()
+  emitter:on('A::**', counters'e0');
+
+  assert_true(emitter:emit('A::A::A'))
+  assert_equal(1, counters.e0)
+end)
+
+it('test 14', function()
+  emitter:on('A::**',    counters'e0');
+  emitter:on('A::A::**', counters'e1');
+
+  assert_true(emitter:emit('A::A::A'))
+  assert_equal(1, counters.e0)
+  assert_equal(1, counters.e1)
+end)
+
 end
 
 local _ENV = TEST_CASE'EventEmitter extend' if ENABLE then

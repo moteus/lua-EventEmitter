@@ -302,6 +302,7 @@ function TreeEventEmitter:off(event, ...)
   return self
 end
 
+-- wld true if `node` is match to `**`
 local function do_emit(self, wld, event, node, ...)
   local ret = false
 
@@ -324,8 +325,7 @@ local function do_emit(self, wld, event, node, ...)
       end
     end
 
-    -- match mask `**` to event
-    -- e.g. origin mask is 'A::**::B' and event is 'A::B'
+    -- match mask is 'A::**::B' and event is 'A::B'
     emitter = node[self._wl2] and node[self._wl2][1]
     if emitter then
       if event == self._wld then
