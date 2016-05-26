@@ -347,8 +347,13 @@ local function do_emit(self, wld, event, node, ...)
     emitter = node[name] and node[name][1]
     if emitter then
       ret = emitter:_emit_impl(false, AN2, ...) or ret
-      if emitter:_empty() then
-        node[name][1] = nil
+      if node[name] then
+        if emitter:_empty() then
+          node[name][1] = nil
+        end
+        if empty(node[name]) then
+          node[name] = nil
+        end
       end
     end
 

@@ -934,6 +934,7 @@ local events = {
   {'A::**::C', 'A::B::C' };
   {'A::**',    'A::B::C' };
   {'A::**::B', 'A::B'    };
+  {'A::**',    'A'       };
 }
 
 for _, event in ipairs(events) do
