@@ -56,7 +56,7 @@ server.on('A', test);
 server.on('A', test);
 server.emit('A')       // `test` called twice
 ```
-3. If event has wildcard followed by soem value then mult-level wildcard does not works
+3. If event has wildcard followed by some value then mult-level wildcard does not works
 ```JS
 server.on('foo.**', test);
 server.emit('foo.*')       // called
