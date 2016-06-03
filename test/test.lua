@@ -67,6 +67,7 @@ end
 
 it('module should has API', function()
   assert(EventEmitter)
+  assert_function(EventEmitter.extend)
   assert_function(EventEmitter.extend_class)
   assert_function(EventEmitter.extend_object)
   assert_function(EventEmitter.new)
@@ -148,39 +149,39 @@ it('emit should pass custom self', function()
   assert_equal(1, counters.e1)
 end)
 
-it('`emit` shold not accept invalid args', function()
+it('`emit` should not accept invalid args', function()
   assert_error('no args'        , function() emitter:on()    end        )
 end)
 
-it('`on` shold not accept invalid args', function()
+it('`on` should not accept invalid args', function()
   assert_error('no args'        , function() emitter:on()    end        )
   assert_error('no listner'     , function() emitter:on('A') end        )
   assert_error('no event'       , function() emitter:on(nil, dummy) end )
   assert_error('invalid listner', function() emitter:on('A', 'B') end   )
 end)
 
-it('`onAny` shold not accept invalid args', function()
+it('`onAny` should not accept invalid args', function()
   assert_error('no args'        , function() emitter:onAny()    end        )
   assert_error('no listner'     , function() emitter:onAny('A') end        )
   assert_error('no event'       , function() emitter:onAny(nil, dummy) end )
   assert_error('invalid listner', function() emitter:onAny('A', 'B') end   )
 end)
 
-it('`once` shold not accept invalid args', function()
+it('`once` should not accept invalid args', function()
   assert_error('no args'        , function() emitter:once()    end        )
   assert_error('no listner'     , function() emitter:once('A') end        )
   assert_error('no event'       , function() emitter:once(nil, dummy) end )
   assert_error('invalid listner', function() emitter:once('A', 'B') end   )
 end)
 
-it('`onceAny` shold not accept invalid args', function()
+it('`onceAny` should not accept invalid args', function()
   assert_error('no args'        , function() emitter:onceAny()    end        )
   assert_error('no listner'     , function() emitter:onceAny('A') end        )
   assert_error('no event'       , function() emitter:onceAny(nil, dummy) end )
   assert_error('invalid listner', function() emitter:onceAny('A', 'B') end   )
 end)
 
-it('`many` shold not accept invalid args', function()
+it('`many` should not accept invalid args', function()
   assert_error('no args'        , function() emitter:many()       end            )
   assert_error('no ttl'         , function() emitter:many('A', nil, dummy) end   )
   assert_error('invalid ttl'    , function() emitter:many('A', '1', dummy) end   )
@@ -190,7 +191,7 @@ it('`many` shold not accept invalid args', function()
   assert_error('invalid listner', function() emitter:many('A', 1, 'B') end       )
 end)
 
-it('`manyAny` shold not accept invalid args', function()
+it('`manyAny` should not accept invalid args', function()
   assert_error('no args'        , function() emitter:manyAny()       end            )
   assert_error('no ttl'         , function() emitter:manyAny('A', nil, dummy) end   )
   assert_error('invalid ttl'    , function() emitter:manyAny('A', '1', dummy) end   )
@@ -540,7 +541,7 @@ it('should match top wildcard', function()
   assert_equal(0, counters.e1)
 end)
 
-it('shold ignore unmatched', function()
+it('should ignore unmatched', function()
   emitter:on('A::*', counters'e0')
   assert_false(emitter:emit('B'))
   assert_equal(0, counters.e0)
@@ -857,7 +858,7 @@ it("should extend class", function()
   assert_nil(next(my_class))
 end)
 
-it("extend class shold work", function()
+it("extend class should work", function()
   local CustomClass = EventEmitter.extend_class(ut.class())
   function CustomClass:__init()
     self._EventEmitter = EventEmitter.new{self=self}
@@ -871,7 +872,48 @@ it("extend class shold work", function()
   assert_equal(1, counters.e0)
 end)
 
-it("extend class shold pass correct self", function()
+it("extend class should accept custom emitter name", function()
+  local CustomClass = EventEmitter.extend(ut.class(), '_emitter')
+  function CustomClass:__init()
+    self._emitter = EventEmitter.new{self=self}
+    return self
+  end
+
+  emitter = CustomClass.new()
+
+  emitter:on('A', counters'e0')
+  assert_true(emitter:emit('A'))
+  assert_equal(1, counters.e0)
+end)
+
+it("extend class should accept function to get emitter", function()
+  local CustomClass = ut.class() do
+    function CustomClass:__init()
+      self._private.emitter = EventEmitter.new{self=self}
+      return self
+    end
+
+    function CustomClass:_emitter()
+      return self._private.emitter
+    end
+
+    EventEmitter.extend(CustomClass, CustomClass._emitter)
+  end
+
+  local CustomClass = EventEmitter.extend_class(ut.class())
+  function CustomClass:__init()
+    self._EventEmitter = EventEmitter.new{self=self}
+    return self
+  end
+
+  emitter = CustomClass.new()
+
+  emitter:on('A', counters'e0')
+  assert_true(emitter:emit('A'))
+  assert_equal(1, counters.e0)
+end)
+
+it("extend class should pass correct self", function()
   local CustomClass = EventEmitter.extend_class(ut.class())
   function CustomClass:__init()
     self._EventEmitter = EventEmitter.new{self=self}
@@ -909,7 +951,7 @@ it("extend object should work", function()
   assert_equal(1, counters.e0)
 end)
 
-it("extend object shold pass correct self", function()
+it("extend object should pass correct self", function()
   emitter = EventEmitter.extend_object(ut.class{}.new())
 
   emitter:on('A', function(self,event)
@@ -922,7 +964,6 @@ it("extend object shold pass correct self", function()
 
   assert_equal(1, counters.e0)
 end)
-
 
 end
 

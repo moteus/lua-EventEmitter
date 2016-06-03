@@ -12,7 +12,7 @@
 
 local EE = {
   _NAME      = "EventEmitter";
-  _VERSION   = "0.1.0";
+  _VERSION   = "0.1.1-dev";
   _COPYRIGHT = "Copyright (C) 2016 Alexey Melnichuk";
   _LICENSE   = "MIT";
 }
@@ -572,23 +572,42 @@ local exports = {'on', 'many', 'once', 'off', 'emit', 'onAny', 'manyAny', 'onceA
   'addListener', 'removeListener', 'removeAllListeners'
 }
 
-extend = function(class)
-  for _, method in ipairs(exports) do
-    class[method] = function(self, ...)
-      return self._EventEmitter[method](self._EventEmitter, ...)
+extend = function(class, getter)
+  getter = getter or '_EventEmitter'
+
+  if type(getter) == 'string' then
+    for _, method in ipairs(exports) do
+      class[method] = function(self, ...)
+        local emitter = self[getter]
+        return emitter[method](emitter, ...)
+      end
     end
-  end
+
+  elseif type(getter) == 'function' then
+    for _, method in ipairs(exports) do
+      class[method] = function(self, ...)
+        local emitter = getter(self)
+        return emitter[method](emitter, ...)
+      end
+    end
+
+
+  elseif getmetatable(getter) == EventEmitter then
+    local emitter = getter
+    for _, method in ipairs(exports) do
+      class[method] = function(self, ...)
+        return emitter[method](emitter, ...)
+      end
+    end
+
+  else error('Unsupported Emitter get argument: ' .. type(getter)) end
+
   return class
 end
 
 wrap = function(object, emitter)
   emitter = emitter or EventEmitter.new{self = object}
-  for _, method in ipairs(exports) do
-    object[method] = function(self, ...)
-      return emitter[method](emitter, ...)
-    end
-  end
-  return object
+  return extend(object, emitter)
 end
 
 end
@@ -596,6 +615,7 @@ end
 return ut.clone(EE, {
   EventEmitter  = EventEmitter,
   new           = EventEmitter.new,
-  extend_object = wrap,
+  extend        = extend,
   extend_class  = extend,
+  extend_object = wrap,
 })

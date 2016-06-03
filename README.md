@@ -15,11 +15,11 @@ local class = require "30log"
 local EventEmitter = class('EventEmitter') do
 
 function EventEmitter:init()
-  -- object have to have `_EventEmitter` property
+  -- object by default should have `_EventEmitter` property
   self._EventEmitter = EE.EventEmitter.new{self = self}
 end
 
-EE.extend_class(EventEmitter)
+EE.extend(EventEmitter)
 
 end
 
