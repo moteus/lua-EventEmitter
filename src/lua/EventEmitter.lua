@@ -573,7 +573,7 @@ local exports = {'on', 'many', 'once', 'off', 'emit', 'onAny', 'manyAny', 'onceA
 }
 
 extend = function(class, getter)
-  getter = getter or '_EventEmitter'
+  getter = (getter == nil) and '_EventEmitter' or getter
 
   if type(getter) == 'string' then
     for _, method in ipairs(exports) do

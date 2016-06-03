@@ -889,6 +889,7 @@ end)
 it("extend class should accept function to get emitter", function()
   local CustomClass = ut.class() do
     function CustomClass:__init()
+      self._private = {}
       self._private.emitter = EventEmitter.new{self=self}
       return self
     end
@@ -898,12 +899,6 @@ it("extend class should accept function to get emitter", function()
     end
 
     EventEmitter.extend(CustomClass, CustomClass._emitter)
-  end
-
-  local CustomClass = EventEmitter.extend_class(ut.class())
-  function CustomClass:__init()
-    self._EventEmitter = EventEmitter.new{self=self}
-    return self
   end
 
   emitter = CustomClass.new()
@@ -963,6 +958,13 @@ it("extend object should pass correct self", function()
   assert_true(emitter:emit('A'))
 
   assert_equal(1, counters.e0)
+end)
+
+it("extend should raise error on unsupportde args", function()
+  assert_error(function() EventEmitter.extend({}, {})    end)
+  assert_error(function() EventEmitter.extend({}, true)  end)
+  assert_error(function() EventEmitter.extend({}, false) end)
+  assert_error(function() EventEmitter.extend()          end)
 end)
 
 end
