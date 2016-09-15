@@ -12,7 +12,7 @@
 
 local EE = {
   _NAME      = "EventEmitter";
-  _VERSION   = "0.1.1-dev";
+  _VERSION   = "0.1.1";
   _COPYRIGHT = "Copyright (C) 2016 Alexey Melnichuk";
   _LICENSE   = "MIT";
 }
