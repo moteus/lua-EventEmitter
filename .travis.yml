@@ -7,16 +7,18 @@ sudo: false
 
 matrix:
   include:
-    - compiler: ": Lua51"
-      env: LUA="lua 5.1"
-    - compiler: ": Lua52"
-      env: LUA="lua 5.2"
-    - compiler: ": Lua53"
-      env: LUA="lua 5.3"
-    - compiler: ": LuaJIT20"
-      env: LUA="luajit 2.0"
-    - compiler: ": LuaJIT21"
-      env: LUA="luajit 2.1"
+    - env: LUA="lua 5.1"
+      os: linux
+    - env: LUA="lua 5.2"
+      os: linux
+    - env: LUA="lua 5.3"
+      os: linux
+    - env: LUA="lua 5.4"
+      os: linux
+    - env: LUA="luajit 2.0"
+      os: linux
+    - env: LUA="luajit 2.1"
+      os: linux
 
 cache:
   directories:
@@ -28,10 +30,11 @@ branches:
     - master
 
 before_install:
-  - export CC=gcc
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then export PATH=$PATH:~/Library/Python/2.7/bin/; fi
+  - pip install --user cpp-coveralls
   - pip install --user hererocks
   - hererocks here -r^ --$LUA
-  - export PATH=$PATH:$PWD/here/bin
+  - source here/bin/activate
 
 install:
   - luarocks make rockspecs/eventemitter-scm-0.rockspec

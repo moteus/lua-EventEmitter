@@ -1,9 +1,9 @@
 package = "EventEmitter"
-version = "scm-0"
+version = "0.1.1-2"
 
 source = {
-  url = "https://github.com/moteus/lua-EventEmitter/archive/master.zip",
-  dir = "lua-EventEmitter-master",
+  url = "https://github.com/moteus/lua-EventEmitter/archive/v0.1.1.zip",
+  dir = "lua-EventEmitter-0.1.1",
 }
 
 description = {
